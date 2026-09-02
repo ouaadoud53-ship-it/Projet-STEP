@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { marcheService, serieService, ouvrageService, productionService, decompositionService } from '../services/api';
 import { Marche, Serie, Ouvrage, LibelleProduction, Decomposition } from '../types';
-import { ChevronDown, ChevronRight, Briefcase, Layers, FolderKanban, Calculator, LineChart, AlertTriangle } from 'lucide-react';
+import { ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
 
 export const Hierarchie: React.FC = () => {
   const [marches, setMarches] = useState<Marche[]>([]);
