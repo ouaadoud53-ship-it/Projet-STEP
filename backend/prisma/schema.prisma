@@ -1,0 +1,121 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Marche {
+  id                 String   @id @default(uuid())
+  codeAffaire        String
+  numeroMarche       String
+  maitreOuvrage      String
+  partenaire         String
+  dateOSCommencement DateTime
+  delaiProjetMois    Int
+  etat               String   @default("PREPARATION") // PREPARATION, EN_COURS, TERMINE, CLOTURE
+  userId             String
+  user               User     @relation(fields: [userId], references: [id])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  series             Serie[]
+
+  @@unique([userId, codeAffaire])
+}
+
+model Serie {
+  id           String   @id @default(uuid())
+  code         String
+  serie        String
+  unite        String
+  quantite     Float
+  puMarcheHT   Float
+  pptMarcheHT  Float
+  marcheId     String
+  marche       Marche   @relation(fields: [marcheId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ouvrages     Ouvrage[]
+
+  @@unique([marcheId, code])
+}
+
+model Ouvrage {
+  id                   String              @id @default(uuid())
+  code                 String
+  numeroPrixBordereau  String
+  ouvrage              String
+  unite                String
+  quantite             Float
+  puMarcheHT           Float
+  pptMarcheHT          Float
+  puRevientReference   Float
+  pptRevientReference  Float
+  serieId              String
+  serie                Serie               @relation(fields: [serieId], references: [id], onDelete: Cascade)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  libellesProduction   LibelleProduction[]
+
+  @@unique([serieId, code])
+}
+
+model LibelleProduction {
+  id                  String          @id @default(uuid())
+  code                String
+  numeroPrixUnitaire  String
+  cleRepartition      String
+  libelleProduction   String
+  unite               String
+  quantite            Float
+  puMarcheHT          Float
+  pptMarcheHT         Float
+  puRevientReference  Float
+  pptRevientReference Float
+  puProduction        Float           @default(0)
+  pptProduction       Float           @default(0)
+  ouvrageId           String
+  ouvrage             Ouvrage         @relation(fields: [ouvrageId], references: [id], onDelete: Cascade)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  decompositions      Decomposition[]
+
+  @@unique([ouvrageId, code])
+}
+
+model Decomposition {
+  id                  String            @id @default(uuid())
+  code                String
+  unite               String
+  libelleElement      String
+  uniteControle       String
+  section             String            // e.g., MAIN D'OEUVRE, MATERIAUX, MATERIEL
+  quantite            Float
+  prixUnitaire        Float
+  montant             Float
+  libelleProductionId String
+  libelleProduction   LibelleProduction @relation(fields: [libelleProductionId], references: [id], onDelete: Cascade)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@unique([libelleProductionId, code])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  nom          String
+  prenom       String
+  email        String   @unique
+  passwordHash String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  marches      Marche[]
+}
