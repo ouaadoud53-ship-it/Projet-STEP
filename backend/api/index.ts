@@ -20,6 +20,15 @@ async function bootstrap() {
 }
 
 export default async function (req, res) {
-  await bootstrap();
-  expressApp(req, res);
+  try {
+    await bootstrap();
+    expressApp(req, res);
+  } catch (error) {
+    console.error('Bootstrap Error:', error);
+    res.status(500).json({
+      message: 'Internal Server Error during bootstrap',
+      error: error.message,
+      stack: error.stack
+    });
+  }
 }
